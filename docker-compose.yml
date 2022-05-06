@@ -10,7 +10,7 @@ services:
     env_file:
       - .env
 
-  rest:
+  grpc:
     container_name: api_parser
     build:
       context: ./api_parser
