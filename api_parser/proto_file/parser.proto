@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package parser;
+
+service ParserService {
+  rpc ListArticle(ListRequest) returns (stream ArticleList) {}
+}
+
+message ArticleList {
+  int32 id = 1;
+  string source_url = 2;
+  string title = 3;
+  string date_time = 4;
+  string image = 5;
+  string description = 6;
+}
+
+message ListRequest {
+}

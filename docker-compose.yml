@@ -1,0 +1,64 @@
+version: "3.0"
+
+
+services:
+  db:
+    container_name: mydb
+    image: postgres:10-alpine
+    ports:
+      - "5433:5432"
+    env_file:
+      - .env
+
+  rest:
+    container_name: api_parser
+    build:
+      context: ./api_parser
+    ports:
+      - "50051:50051"
+    env_file:
+      - .env
+    command: >
+      sh -c "python3 manage.py makemigrations && 
+      python3 manage.py migrate &&
+      python3 manage.py grpcrunserver"
+    depends_on:
+      - db
+
+  redis:
+    container_name: redis
+    image: redis:5-alpine
+    ports:
+      - "6378:6379"
+
+  celery-beat:
+    container_name: celery_bit
+    build: ./api_parser
+    command: celery -A api_parser_cel beat -l INFO
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - redis
+      - celery
+
+  celery:
+    container_name: celery
+    build: ./api_parser
+    command: celery -A api_parser_cel worker --loglevel=INFO
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - redis
+
+  pgadmin:
+    container_name: pgadmin1
+    image: dpage/pgadmin4
+    env_file:
+      - .env
+    ports:
+      - "5050:80"
+    restart: unless-stopped
+volumes:
+  my_pgdata:
